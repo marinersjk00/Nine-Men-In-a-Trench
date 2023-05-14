@@ -10,6 +10,7 @@ static Scanner in = new Scanner(System.in);
 static class State{
 	ArrayList<ArrayList<Character>> state; //2 rows to hold the recesses
 	int depth;
+	int manhattan;
 	
 	State() {//building start state
 
@@ -43,6 +44,13 @@ static class State{
 		this.depth = dep;
 		
 	}
+	
+	State(ArrayList<ArrayList<Character>> curr, int dep, int man){
+		this.state = curr;
+		this.depth = dep;
+		this.manhattan = man;
+		
+	}
 }
 
 static class StateCompareDepth implements Comparator<State>{ //Comparator for priority queue. Prioritizes min depth
@@ -50,6 +58,18 @@ static class StateCompareDepth implements Comparator<State>{ //Comparator for pr
 		if(s.depth < p.depth) {
 			return -1;
 		}else if(s.depth > p.depth) {
+			return 1;
+		}else {
+			return 0;
+		}
+	}
+}
+
+static class StateCompareManhattan implements Comparator<State>{ //Comparator for priority queue. Prioritizes min(depth + numMisplaced)
+	public int compare(State s, State p) {
+		if((s.depth + s.manhattan) < (p.depth + p.manhattan)) {
+			return -1;
+		}else if((s.depth + s.manhattan) > (p.depth + p.manhattan)) {
 			return 1;
 		}else {
 			return 0;
@@ -71,7 +91,8 @@ static ArrayList<ArrayList<Character>> swap(ArrayList<ArrayList<Character>> arr,
 static boolean isGoal(ArrayList<ArrayList<Character>> curr, ArrayList<ArrayList<Character>> goal){ //function used to check if current state is the goal. Called on every state
 	for(int i = 0; i < 2; i++){
 		for(int j = 0; j < 10; j++){
-			if(curr.get(i).get(j) != goal.get(i).get(j)) return false;
+			if(curr.get(i).get(j) == goal.get(i).get(j))continue;
+			else return false;
 		}
 	}
 	
@@ -86,6 +107,66 @@ static boolean isGoal(ArrayList<ArrayList<Character>> curr, ArrayList<ArrayList<
 	}
 	
 	return true;
+}
+
+static int countManhattan(ArrayList<ArrayList<Character>> curr) { //Manhattan Distance is calculated by finding the distance
+	//from each soldier's current position to their proper position in the goal state
+	int manhattanDis = 0;
+	
+	for(int i = 0; i < 2; i++) {
+		for(int j = 0; j < 10; j++) {
+			switch(curr.get(i).get(j)) {
+				
+				case '1':
+					manhattanDis += j;
+					if (i == 0) manhattanDis++;
+					break;
+					
+				case '2':
+					manhattanDis += Math.abs(j-1);
+					if(i == 0) manhattanDis++;
+					break;
+					
+				case '3':
+					manhattanDis += Math.abs(j-2);
+					if(i == 0) manhattanDis++;
+					break;
+				case '4':
+					manhattanDis += Math.abs(j-3);
+					if(i == 0) manhattanDis++;
+					break;
+					
+				case '5':
+					manhattanDis += Math.abs(j-4);
+					if(i == 0) manhattanDis++;
+					break;
+					
+				case '6':
+						manhattanDis += Math.abs(j-5);
+						if(i == 0) manhattanDis++;
+						break;
+				case '7':
+					manhattanDis += Math.abs(j-6);
+					if(i == 0) manhattanDis++;
+					break;
+				case '8':
+					manhattanDis += Math.abs(j-7);
+					if(i == 0) manhattanDis++;
+					break;
+				case '9':
+					manhattanDis += Math.abs(j-8);
+					if(i == 0) manhattanDis++;
+					break;
+					
+				default:
+					break;
+			}
+			
+		}
+	}
+	
+	return manhattanDis;
+	
 }
 
 static void uniformSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, Integer> seen, Queue<State> next) {
@@ -107,16 +188,14 @@ static void uniformSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, I
 						}
 						
 						if(curr.state.get(i + 1).get(j) == '-') { //open space to swap to
-							ArrayList<ArrayList<Character>> move = swap(copy, copy.get(i).get(j), copy.get(i + 1).get(j), i, j, i + 1, j);
-							State nextState = new State(move, curr.depth + 1);
+							swap(copy, copy.get(i).get(j), copy.get(i + 1).get(j), i, j, i + 1, j);
+							State nextState = new State(copy, curr.depth + 1);
 							if(!seen.containsKey(nextState.state)) {
 								seen.put(nextState.state,  curr.depth + 1);
 								next.add(nextState);
-							}else {
-								System.out.println("Repeat state.");
-								int x = in.nextInt();
 							}
 						}
+						continue;
 					}
 					
 					if(j > 0) {
@@ -130,8 +209,8 @@ static void uniformSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, I
 						}
 						
 						if(curr.state.get(i).get(j-1) == '-') { //open space to swap to
-							ArrayList<ArrayList<Character>> move = swap(copy, copy.get(i).get(j), copy.get(i).get(j-1), i, j, i, j - 1);
-							State nextState = new State(move, curr.depth + 1);
+							swap(copy, copy.get(i).get(j), copy.get(i).get(j-1), i, j, i, j - 1);
+							State nextState = new State(copy, curr.depth + 1);
 							if(!seen.containsKey(nextState.state)) {
 								seen.put(nextState.state,  curr.depth + 1);
 								next.add(nextState);
@@ -151,8 +230,8 @@ static void uniformSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, I
 						}
 						
 						if(curr.state.get(i).get(j+1) == '-') { //open space to swap to
-							ArrayList<ArrayList<Character>> move = swap(copy, copy.get(i).get(j), copy.get(i).get(j+1), i, j, i, j + 1);
-							State nextState = new State(move, curr.depth + 1);
+							swap(copy, copy.get(i).get(j), copy.get(i).get(j+1), i, j, i, j + 1);
+							State nextState = new State(copy, curr.depth + 1);
 							if(!seen.containsKey(nextState.state)) {
 								seen.put(nextState.state,  curr.depth + 1);
 								next.add(nextState);
@@ -172,8 +251,8 @@ static void uniformSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, I
 						}
 						
 						if(curr.state.get(i - 1).get(j) == '-') { //open space to swap to
-							ArrayList<ArrayList<Character>> move = swap(copy, copy.get(i).get(j), copy.get(i - 1).get(j), i, j, i - 1, j);
-							State nextState = new State(move, curr.depth + 1);
+							 swap(copy, copy.get(i).get(j), copy.get(i - 1).get(j), i, j, i - 1, j);
+							State nextState = new State(copy, curr.depth + 1);
 							if(!seen.containsKey(nextState.state)) {
 								seen.put(nextState.state,  curr.depth + 1);
 								next.add(nextState);
@@ -188,6 +267,105 @@ static void uniformSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, I
 		
 	
 	}
+
+static void manhattanSearch(State curr, HashMap<ArrayList<ArrayList<Character>>, Integer> seen, Queue<State> next) {
+	
+	
+	for(int i = 0; i < 2; i++) {
+		for(int j = 0; j < 10; j++) {
+			if(curr.state.get(i).get(j) != 'x') { //x's don't move
+				 
+					//checking down
+				if(i == 0) {
+					ArrayList<ArrayList<Character>> copy = new ArrayList<ArrayList<Character>>();
+					for(int k = 0; k < 2; k++) {
+						copy.add(new ArrayList<Character>());
+						for(int m = 0; m < 10; m++) {
+							copy.get(k).add(curr.state.get(k).get(m));
+						}
+						
+					}
+					
+					if(curr.state.get(i + 1).get(j) == '-') { //open space to swap to
+						int manhattanDis = countManhattan(swap(copy, copy.get(i).get(j), copy.get(i + 1).get(j), i, j, i + 1, j));
+						State nextState = new State(copy, curr.depth + 1, manhattanDis);
+						if(!seen.containsKey(nextState.state)) {
+							seen.put(nextState.state,  curr.depth + 1);
+							next.add(nextState);
+						}
+					}
+					continue;
+				}
+				
+				if(j > 0) {
+					ArrayList<ArrayList<Character>> copy = new ArrayList<ArrayList<Character>>();
+					for(int k = 0; k < 2; k++) {
+						copy.add(new ArrayList<Character>());
+						for(int m = 0; m < 10; m++) {
+							copy.get(k).add(curr.state.get(k).get(m));
+						}
+						
+					}
+					
+					if(curr.state.get(i).get(j-1) == '-') { //open space to swap to
+						int manhattanDis = countManhattan(swap(copy, copy.get(i).get(j), copy.get(i).get(j-1), i, j, i, j-1));
+						State nextState = new State(copy, curr.depth + 1, manhattanDis);
+						if(!seen.containsKey(nextState.state)) {
+							seen.put(nextState.state,  curr.depth + 1);
+							next.add(nextState);
+						}
+					}
+					
+				}
+				
+				if(j < 9) {
+					ArrayList<ArrayList<Character>> copy = new ArrayList<ArrayList<Character>>();
+					for(int k = 0; k < 2; k++) {
+						copy.add(new ArrayList<Character>());
+						for(int m = 0; m < 10; m++) {
+							copy.get(k).add(curr.state.get(k).get(m));
+						}
+						
+					}
+					
+					if(curr.state.get(i).get(j+1) == '-') { //open space to swap to
+						int manhattanDis = countManhattan(swap(copy, copy.get(i).get(j), copy.get(i).get(j+1), i, j, i, j+1));
+						State nextState = new State(copy, curr.depth + 1, manhattanDis);
+						if(!seen.containsKey(nextState.state)) {
+							seen.put(nextState.state,  curr.depth + 1);
+							next.add(nextState);
+						}
+					}
+					
+				}
+				
+				if(i == 1) {
+					ArrayList<ArrayList<Character>> copy = new ArrayList<ArrayList<Character>>();
+					for(int k = 0; k < 2; k++) {
+						copy.add(new ArrayList<Character>());
+						for(int m = 0; m < 10; m++) {
+							copy.get(k).add(curr.state.get(k).get(m));
+						}
+						
+					}
+					
+					if(curr.state.get(i - 1).get(j) == '-') { //open space to swap to
+						int manhattanDis = countManhattan(swap(copy, copy.get(i).get(j), copy.get(i - 1).get(j), i, j, i - 1, j));
+						State nextState = new State(copy, curr.depth + 1, manhattanDis);
+						if(!seen.containsKey(nextState.state)) {
+							seen.put(nextState.state,  curr.depth + 1);
+							next.add(nextState);
+						}
+					}
+				}
+				
+			}
+		}
+	}
+	
+	
+
+}
 	
 public static void UniformCostSearch(ArrayList<ArrayList<Character>> goalState, HashMap<ArrayList<ArrayList<Character>>, Integer> seenStates, PriorityQueue<State> next) {
 
@@ -207,7 +385,7 @@ public static void UniformCostSearch(ArrayList<ArrayList<Character>> goalState, 
 		State curr = next.remove();
 		maxDepth = Math.max(maxDepth,  curr.depth);
 		
-		System.out.print("\nExpanding State with g(n) =  " + curr.depth + " and h(n) = 0\n\n");
+		System.out.print("\nExpanding State with g(n) =  " + curr.depth + " and h(n) = " + curr.manhattan + "\n\n");
 		
 		for(int i = 0; i < 2; i++) {
 			for(int j = 0; j < 10; j++) {
@@ -217,8 +395,10 @@ public static void UniformCostSearch(ArrayList<ArrayList<Character>> goalState, 
 		}
 		isSolvable = isGoal(curr.state, goalState);
 		if(isSolvable) finished = curr;
-		uniformSearch(curr, seenStates, next);	
+		manhattanSearch(curr, seenStates, next);	
 		numExpansions++;
+	
+		
 	}
 	insta = Instant.now();
 	long endTime = insta.toEpochMilli();
@@ -244,13 +424,40 @@ public static void UniformCostSearch(ArrayList<ArrayList<Character>> goalState, 
 		PriorityQueue<State> next = null; //to pick next state
 		ArrayList<ArrayList<Character>> goal = new ArrayList<ArrayList<Character>>(); //the goal state of the problem
 		HashMap<ArrayList<ArrayList<Character>>, Integer> seen = new HashMap<>(); //tracking seen states
-		State startState = new State(); //the start state
-		seen.put(startState.state,  0);
-
+	//	State startState = new State(); //the start state
+	//	seen.put(startState.state,  0);
+		ArrayList<ArrayList<Character>> test = new ArrayList<ArrayList<Character>>();
+		test.add(new ArrayList<Character>());
 		
+		test.get(0).add('x');
+		test.get(0).add('x');
+		test.get(0).add('x');
+		test.get(0).add('-');
+		test.get(0).add('x');
+		test.get(0).add('-');
+		test.get(0).add('x');
+		test.get(0).add('-');
+		test.get(0).add('x');
+		test.get(0).add('x');
+	
+		test.add(new ArrayList<Character>());
+		test.get(1).add('-');
+		test.get(1).add('2');
+		test.get(1).add('3');
+		test.get(1).add('4');
+		test.get(1).add('5');
+		test.get(1).add('6');
+		test.get(1).add('7');
+		test.get(1).add('8');
+		test.get(1).add('9');
+		test.get(1).add('1');
+		
+		State testStart = new State(test, 0);
+
+
 		for(int i = 0; i < 2; i++) {
 			for(int j = 0; j < 10; j++) {
-				System.out.print((char)startState.state.get(i).get(j));
+				System.out.print((char)testStart.state.get(i).get(j));
 			}
 			System.out.println();
 		}
@@ -280,12 +487,12 @@ public static void UniformCostSearch(ArrayList<ArrayList<Character>> goalState, 
 	
 		
 		
-		next = new PriorityQueue<State>(new StateCompareDepth());
-		next.add(startState);
+		next = new PriorityQueue<State>(new StateCompareManhattan());
+		next.add(testStart);
 		UniformCostSearch(goal, seen, next ); 
 		
 		
-		System.out.println("Thank you for utilizing Jordan Kuschner's 8-puzzle solver!");
+		System.out.println("Thank you for utilizing Jordan Kuschner's Nine Men in a Trench solver!");
 		
 
 	}
