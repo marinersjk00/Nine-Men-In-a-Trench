@@ -701,28 +701,28 @@ public static void MisplacedSearching(ArrayList<ArrayList<Character>> goalState,
 			test.get(0).add('x');
 			test.get(0).add('-');
 			test.get(0).add('x');
-			test.get(0).add('5');
+			test.get(0).add('-');
 			test.get(0).add('x');
-			test.get(0).add('8');
+			test.get(0).add('-');
 			test.get(0).add('x');
 			test.get(0).add('x');
 		
 			test.add(new ArrayList<Character>());
-			test.get(1).add('1');
-			test.get(1).add('-');
-			test.get(1).add('-');
 			test.get(1).add('-');
 			test.get(1).add('2');
 			test.get(1).add('3');
 			test.get(1).add('4');
+			test.get(1).add('5');
 			test.get(1).add('6');
 			test.get(1).add('7');
+			test.get(1).add('8');
 			test.get(1).add('9');
+			test.get(1).add('1');
 			
 		}else if(startChoice == 2) {
 			System.out.println("You have chosen to start from a state along the solution path.");
 			System.out.println("Please choose a difficulty level:");
-			System.out.println("1. Trivial\n2. Easy Peasy\n3. Eh\n4.Careful Now\n5. Oh Boy!");
+			System.out.println("1. Trivial\n2. Easy Peasy\n3. Eh\n4. Careful Now\n5. Oh Boy!");
 			int startStateChoice = in.nextInt();
 			if(startStateChoice == 1) {
 				System.out.println("You have selected the Trivial start state!");
